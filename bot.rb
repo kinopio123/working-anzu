@@ -15,6 +15,7 @@ kakopts = 0
 sabunpts = 0
 outpts= 0
 y = 0
+errer = false
 
 help = ">>> ボーダー監視bot 0.1 作:きのぴお\n
  概要\n
@@ -41,7 +42,14 @@ bot.command :start do |event,inname|
           #更新時間に計算
           url = 'https://aidoru.info/event/viewrank'
           html = open(url).read
+          begin
           doc = Nokogiri::HTML.parse(html)
+          rescue
+             puts "取得エラー"
+             errer = true
+             sleep 10
+             retry
+          end
           doc.xpath("/html/body/div/div[2]/div/table/tbody").each do |node|
             node.xpath("/html/body/div/div[2]/div/table/tbody/tr/td[3]").each do |bname| #名前取得
               bpts = node.xpath("/html/body/div/div[2]/div/table/tbody/tr/td[2]")[x].inner_html.to_s.strip #pt取得
@@ -60,7 +68,12 @@ bot.command :start do |event,inname|
         else
           #何もしない
         end
+        if errer == true
+          errer = false
+          sleep 50
+        else
         sleep 60
+        end
       end
     else
       event.send_message("既に監視しています")
